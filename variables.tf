@@ -19,7 +19,7 @@ variable "organization_email" {
 
 variable "organization_allow_billing_access" {
   description = "Allow Billing access to organization structure sub-accounts"
-  default = false
+  default     = false
 }
 
 variable "organization_role" {
