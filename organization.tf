@@ -3,7 +3,7 @@
 # iam users are granted by default
 
 resource "aws_organizations_account" "org" {
-  name                       = local.full_organization_name
+  name                       = module.tags.locals.organization_name
   email                      = var.organization_email
   iam_user_access_to_billing = var.organization_allow_billing_access ? "ALLOW" : "DENY"
   role_name                  = var.organization_role
