@@ -9,3 +9,5 @@
 *.tfvars
 .accelerate
 accelerate
+
+.terraform.lock.hcl
