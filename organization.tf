@@ -7,7 +7,7 @@ resource "aws_organizations_account" "org" {
   email                      = var.organization_email
   iam_user_access_to_billing = var.organization_allow_billing_access ? "ALLOW" : "DENY"
   role_name                  = var.organization_role
-  close_on_deletion          = true
+  close_on_deletion          = false
   #parent_id                  = var.organization_parent_id
 
   # This is not the best situation but prevents resource regeneration
