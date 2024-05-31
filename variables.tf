@@ -1,22 +1,39 @@
-variable "env" {
-  description = "Environment definition object"
-  type        = any
-  default     = {}
+variable "name" {
+  type    = string
+  default = ""
+}
+
+variable "organization_name" {
+  type = string
+}
+
+variable "fintech_name" {
+  type = string
+}
+
+variable "environment_type" {
+  type = string
+}
+
+variable "environment_name" {
+  type = string
 }
 
 variable "organization_email" {
-  description = "Organization e-mail for root id"
-}
-
-variable "organization_allow_billing_access" {
-  description = "Allow Billing access to organization structure sub-accounts"
-  default     = false
+  type = string
 }
 
 variable "organization_role" {
-  default = "OrganizationAllowAllAccess"
+  type    = string
+  default = "OrganizationAllowAllAccessAssumeRole"
 }
 
-variable "aws_region" {
-  default = "us-east-1"
+variable "organization_allow_billing_access" {
+  type    = bool
+  default = true
+}
+
+variable "organization_parent_id" {
+  type    = string
+  default = null
 }

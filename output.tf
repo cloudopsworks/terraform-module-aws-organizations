@@ -6,6 +6,9 @@ output "org_arn" {
   value = aws_organizations_account.org.arn
 }
 
+output "org_name" {
+  value = aws_organizations_account.org.name
+}
 output "org_assume_role_id" {
   value = "arn:aws:iam::${aws_organizations_account.org.id}:role/${var.organization_role}"
 }

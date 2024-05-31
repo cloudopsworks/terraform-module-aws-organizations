@@ -11,3 +11,5 @@
 tronador
 
 .terraform.lock.hcl
+
+.idea/

@@ -3,10 +3,12 @@
 # iam users are granted by default
 
 resource "aws_organizations_account" "org" {
-  name                       = module.tags.locals.organization_name
+  name                       = var.name == "" ? module.tags.locals.environment_name : var.name
   email                      = var.organization_email
   iam_user_access_to_billing = var.organization_allow_billing_access ? "ALLOW" : "DENY"
   role_name                  = var.organization_role
+  close_on_deletion          = true
+  #parent_id                  = var.organization_parent_id
 
   # This is not the best situation but prevents resource regeneration
   # that can mess up an organization
@@ -17,4 +19,6 @@ resource "aws_organizations_account" "org" {
       name,
     ]
   }
+
+  tags = module.tags.locals.common_tags
 }
