@@ -3,7 +3,7 @@
 #            On GitHub: https://github.com/cloudopsworks
 #            Distributed Under Apache v2.0 License
 #
-output "acoount_id" {
+output "account_id" {
   value = aws_organizations_account.org.id
 }
 
