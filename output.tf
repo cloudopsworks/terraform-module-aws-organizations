@@ -21,3 +21,12 @@ output "org_assume_role_id" {
 output "org_console_url" {
   value = "https://${aws_organizations_account.org.id}.signin.aws.amazon.com/console"
 }
+
+output "org_tags" {
+  value = {
+    organization_name = var.organization_name
+    organization_unit = var.fintech_name
+    environment_name  = var.environment_name
+    environment_type  = var.environment_type
+  }
+}
