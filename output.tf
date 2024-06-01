@@ -3,26 +3,26 @@
 #            On GitHub: https://github.com/cloudopsworks
 #            Distributed Under Apache v2.0 License
 #
-output "org_id" {
+output "acoount_id" {
   value = aws_organizations_account.org.id
 }
 
-output "org_arn" {
+output "account_arn" {
   value = aws_organizations_account.org.arn
 }
 
-output "org_name" {
+output "account_name" {
   value = aws_organizations_account.org.name
 }
-output "org_assume_role_id" {
+output "account_assume_role_id" {
   value = "arn:aws:iam::${aws_organizations_account.org.id}:role/${var.organization_role}"
 }
 
-output "org_console_url" {
+output "account_console_url" {
   value = "https://${aws_organizations_account.org.id}.signin.aws.amazon.com/console"
 }
 
-output "org_tags" {
+output "account_tags" {
   value = {
     organization_name = var.organization_name
     organization_unit = var.fintech_name
