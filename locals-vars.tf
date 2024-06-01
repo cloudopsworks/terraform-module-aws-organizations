@@ -1,3 +1,8 @@
+##
+# (c) 2024 - Cloud Ops Works LLC - https://cloudops.works/
+#            On GitHub: https://github.com/cloudopsworks
+#            Distributed Under Apache v2.0 License
+#
 module "tags" {
   source  = "cloudopsworks/tags/local"
   version = "1.0.8"

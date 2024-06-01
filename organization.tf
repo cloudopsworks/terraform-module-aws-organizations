@@ -1,3 +1,8 @@
+##
+# (c) 2024 - Cloud Ops Works LLC - https://cloudops.works/
+#            On GitHub: https://github.com/cloudopsworks
+#            Distributed Under Apache v2.0 License
+#
 # This template will setup organization with the information below,
 # Set-up of role is automatic + the the access to billing for
 # iam users are granted by default
