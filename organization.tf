@@ -6,6 +6,12 @@
 # This template will setup organization with the information below,
 # Set-up of role is automatic + the the access to billing for
 # iam users are granted by default
+locals {
+  all_tags = merge(
+    var.extra_tags,
+    module.tags.locals.common_tags
+  )
+}
 
 resource "aws_organizations_account" "org" {
   name                       = var.name == "" ? module.tags.locals.environment_name : var.name
@@ -25,5 +31,5 @@ resource "aws_organizations_account" "org" {
     ]
   }
 
-  tags = module.tags.locals.common_tags
+  tags = local.all_tags
 }

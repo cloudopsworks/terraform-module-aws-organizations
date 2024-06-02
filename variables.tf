@@ -42,3 +42,8 @@ variable "organization_parent_id" {
   type    = string
   default = null
 }
+
+variable "extra_tags" {
+  type    = map(string)
+  default = {}
+}
