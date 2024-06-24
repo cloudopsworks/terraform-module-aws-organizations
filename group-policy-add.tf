@@ -5,9 +5,10 @@
 #
 # IAM group access
 module "allow_group" {
-  count          = var.allow_group ? 1 : 0
-  source         = "./modules/group-policy"
-  allowsts_group = var.allowsts_group
-  role_arn       = "arn:aws:iam::${aws_organizations_account.org.id}:role/${var.access_role}"
-  tags           = module.tags.locals.common_tags
+  count             = var.allow_group ? 1 : 0
+  source            = "./modules/group-policy"
+  allowsts_group    = var.allowsts_group
+  role_arn          = "arn:aws:iam::${aws_organizations_account.org.id}:role/${var.access_role}"
+  organization_unit = var.organization_unit
+  environment_name  = var.environment_name
 }
