@@ -12,7 +12,7 @@ variable "organization_name" {
   type = string
 }
 
-variable "fintech_name" {
+variable "organization_unit" {
   type = string
 }
 

@@ -9,7 +9,7 @@ module "tags" {
 
   env = {
     organization_name = var.organization_name
-    org_unit_name     = var.fintech_name
+    org_unit_name     = var.organization_unit
     environment_name  = var.environment_name
     environment_type  = var.environment_type
   }

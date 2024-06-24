@@ -25,7 +25,7 @@ output "account_console_url" {
 output "account_tags" {
   value = {
     organization_name = var.organization_name
-    organization_unit = var.fintech_name
+    organization_unit = var.organization_unit
     environment_name  = var.environment_name
     environment_type  = var.environment_type
   }
