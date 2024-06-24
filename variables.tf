@@ -47,3 +47,18 @@ variable "extra_tags" {
   type    = map(string)
   default = {}
 }
+
+variable "allow_group" {
+  type    = bool
+  default = false
+}
+
+variable "allowsts_group" {
+  type    = string
+  default = "terraform-access"
+}
+
+variable "access_role" {
+  type    = string
+  default = "TerraformRole"
+}
