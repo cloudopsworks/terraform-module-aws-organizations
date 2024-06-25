@@ -17,7 +17,11 @@ variable "role_arn" {
 }
 
 variable "environment_name" {
-  type    = string
+  type = string
+}
+
+variable "environment_type" {
+  type = string
 }
 
 variable "organization_unit" {
