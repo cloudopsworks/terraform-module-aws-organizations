@@ -1,4 +1,4 @@
-{{ with .optionalVariables.tags }}
+{{ with .tags }}
 {{ . toJSON }}
 {{ end }}
 `
