@@ -3,25 +3,24 @@
 #            On GitHub: https://github.com/cloudopsworks
 #            Distributed Under Apache v2.0 License
 #
-requiredVariables:
-  - Name: org_name
-    Description: "Organization Name"
-    Type: String
+variables:
+  - name: org_name
+    description: "Organization Name"
+    type: string
   - Name: org_unit
     Description: "Organization Unit"
-    Type: String
-  - Name: environment_name
-    Description: "Environment Name"
-    Type: String
-  - Name: environment_type
+    Type: string
+  - name: environment_name
+    description: "Environment Name"
+    type: string
+  - name: environment_type
     Description: "Environment Type"
-    Type: String
-optionalVariables:
-  - Name: org_allow_billing_access
-    Description: "Allow Billing Access"
-    Type: Boolean
-    DefaultValuePlaceholder: true
-  - Name: tags
-    Description: "Tags"
-    Type: Map
-    DefaultValuePlaceholder: {}
+    Type: string
+  - name: org_allow_billing_access
+    description: "Allow Billing Access"
+    type: boolean
+    default: true
+  - name: tags
+    description: "Tags"
+    type: map
+    default: {}
