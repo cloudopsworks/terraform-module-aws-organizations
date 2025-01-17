@@ -16,10 +16,10 @@ variables:
 #  - name: environment_type
 #    Description: "Environment Type"
 #    Type: string
-#  - name: organization_allow_billing_access
-#    description: "Allow Billing Access"
-#    type: boolean
-#    default: true
+  - name: organization_allow_billing_access
+    description: "Allow Billing Access"
+    type: boolean
+    default: true
 #  - name: tags
 #    description: "Tags"
 #    type: map
