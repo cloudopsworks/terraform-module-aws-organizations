@@ -18,7 +18,7 @@ variables:
 #    Type: string
   - name: organization_allow_billing_access
     description: "Allow Billing Access"
-    type: boolean
+    type: bool
     default: true
 #  - name: tags
 #    description: "Tags"
