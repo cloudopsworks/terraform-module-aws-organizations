@@ -1,7 +1,7 @@
 # Module configuration
 org:
-  name: "&& .organization_name }}"
-  organization_unit: "&& .organization_unit }}"
-  environment_type: "&& .environment_type }}"
-  environment_name: "&& .environment_name }}"
-  email: "&& .org_email }}"
+  name: "{{ .organization_name }}"
+  organization_unit: "{{ .organization_unit }}"
+  environment_type: "{{ .environment_type }}"
+  environment_name: "{{ .environment_name }}"
+  email: "{{ .org_email }}"
