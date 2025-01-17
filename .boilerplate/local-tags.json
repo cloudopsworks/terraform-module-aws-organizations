@@ -1,4 +1,1 @@
-{{ with .tags }}
-{{ . toJSON }}
-{{ end }}
-`
+{{ .tags | toJSON }}
