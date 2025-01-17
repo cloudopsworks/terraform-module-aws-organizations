@@ -16,6 +16,9 @@ variables:
   - name: environment_type
     Description: "Environment Type"
     Type: string
+  - name: organization_email
+    description: "Organization Email"
+    type: string
   - name: organization_allow_billing_access
     description: "Allow Billing Access"
     type: bool

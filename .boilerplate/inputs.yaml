@@ -4,4 +4,4 @@ org:
   organization_unit: "{{ .organization_unit }}"
   environment_type: "{{ .environment_type }}"
   environment_name: "{{ .environment_name }}"
-  email: "{{ .org_email }}"
+  email: "{{ .organization_email }}"
