@@ -21,3 +21,7 @@ optionalVariables:
     Description: "Allow Billing Access"
     Type: Boolean
     DefaultValuePlaceholder: true
+  - Name: tags
+    Description: "Tags"
+    Type: Map
+    DefaultValuePlaceholder: {}
