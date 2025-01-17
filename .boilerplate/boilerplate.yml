@@ -4,10 +4,10 @@
 #            Distributed Under Apache v2.0 License
 #
 variables:
-  - name: org_name
+  - name: organization_name
     description: "Organization Name"
     type: string
-  - Name: org_unit
+  - Name: organization_unit
     Description: "Organization Unit"
     Type: string
   - name: environment_name
@@ -16,7 +16,7 @@ variables:
   - name: environment_type
     Description: "Environment Type"
     Type: string
-  - name: org_allow_billing_access
+  - name: organization_allow_billing_access
     description: "Allow Billing Access"
     type: boolean
     default: true

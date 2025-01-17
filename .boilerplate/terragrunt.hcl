@@ -20,6 +20,6 @@ inputs = {
   environment_type                  = local.local_vars.org.environment_type
   environment_name                  = local.local_vars.org.environment_name
   organization_email                = local.local_vars.org.email
-  organization_allow_billing_access = {{ .org_allow_billing_access }}
+  organization_allow_billing_access = {{ .organization_allow_billing_access }}
   extra_tags                        = local.tags
 }
