@@ -1,0 +1,23 @@
+##
+# (c) 2025 - Cloud Ops Works LLC - https://cloudops.works/
+#            On GitHub: https://github.com/cloudopsworks
+#            Distributed Under Apache v2.0 License
+#
+requiredVariables:
+  - Name: org_name
+    Description: "Organization Name"
+    Type: String
+  - Name: org_unit
+    Description: "Organization Unit"
+    Type: String
+  - Name: environment_name
+    Description: "Environment Name"
+    Type: String
+  - Name: environment_type
+    Description: "Environment Type"
+    Type: String
+optionalVariables:
+  - Name: org_allow_billing_access
+    Description: "Allow Billing Access"
+    Type: Boolean
+    DefaultValuePlaceholder: true
