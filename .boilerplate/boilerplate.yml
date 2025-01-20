@@ -4,30 +4,30 @@
 #            Distributed Under Apache v2.0 License
 #
 variables:
-  - name: organization_name
-    description: "Organization Name"
-    type: string
-    default: ""
-  - Name: organization_unit
-    Description: "Organization Unit"
-    Type: string
-    default: ""
-  - name: environment_name
-    description: "Environment Name"
-    type: string
-    default: ""
-  - name: environment_type
-    Description: "Environment Type"
-    Type: string
-    default: ""
-  - name: organization_email
-    description: "Organization Email"
-    type: string
-    default: ""
-  - name: organization_allow_billing_access
-    description: "Allow Billing Access"
-    type: bool
-    default: true
+#  - name: organization_name
+#    description: "Organization Name"
+#    type: string
+#    default: ""
+#  - Name: organization_unit
+#    Description: "Organization Unit"
+#    Type: string
+#    default: ""
+#  - name: environment_name
+#    description: "Environment Name"
+#    type: string
+#    default: ""
+#  - name: environment_type
+#    Description: "Environment Type"
+#    Type: string
+#    default: ""
+#  - name: organization_email
+#    description: "Organization Email"
+#    type: string
+#    default: ""
+#  - name: organization_allow_billing_access
+#    description: "Allow Billing Access"
+#    type: bool
+#    default: true
   - name: tags
     description: "Tags"
     type: map
