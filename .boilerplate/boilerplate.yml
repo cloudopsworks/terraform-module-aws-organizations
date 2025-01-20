@@ -7,7 +7,7 @@ variables:
   - name: organization_name
     description: "Organization Name"
     type: string
-    default: ""
+    #default: ""
 #  - Name: organization_unit
 #    Description: "Organization Unit"
 #    type: string
