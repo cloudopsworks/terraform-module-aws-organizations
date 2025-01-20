@@ -1,13 +1,15 @@
 # Module configuration
 org:
   # Required variables
-  {{ range .requiredVariables }}
+  {{- range .requiredVariables }}
   # Description {{ .Description }} , Type: {{ .Type }}
   {{ .Name }}: {{ .DefaultValuePlaceholder }}
-  {{ end }}
+
+  {{- end }}
 # Optional variables
-{{ range .optionalVariables }}
+{{- range .optionalVariables }}
 # Description {{ .Description }} , Type: {{ .Type }}
 #{{ .Name }}: {{ .DefaultValue }}
-{{ end }}
+
+{{- end }}
 
