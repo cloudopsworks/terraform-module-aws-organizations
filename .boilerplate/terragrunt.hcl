@@ -24,6 +24,7 @@ inputs = {
   environment_type                  = local.local_vars.org.environment_type
   environment_name                  = local.local_vars.org.environment_name
   organization_email                = local.local_vars.org.email
-  organization_allow_billing_access = {{ .organization_allow_billing_access }}
+  organization_allow_billing_access = try(local.local_vars.allow_billing_access, {{ .optionalVariables.organization_allow_billing_access.DefaultValue }})
+  allow_group                       = try(local.local_vars.allow_group, {{ .opionalVariables.allow_group.DefaultValue }})
   extra_tags                        = local.tags
 }
