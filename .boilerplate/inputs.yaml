@@ -3,7 +3,8 @@ org:
   # Required variables
   {{- range $tf := .requiredVariables }}
   # Description {{ .Description }} , Type: {{ .Type }}
-  {{ $tf.Name }}: {{or (index . $tf.Name) "" }}
+
+  {{ $tf.Name }}:
   {{- end }}
 
 # Optional variables
