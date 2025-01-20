@@ -10,7 +10,7 @@ variables:
     default: ""
   - Name: organization_unit
     Description: "Organization Unit"
-    Type: string
+    type: string
     default: ""
   - name: environment_name
     description: "Environment Name"
@@ -18,7 +18,7 @@ variables:
     default: ""
   - name: environment_type
     Description: "Environment Type"
-    Type: string
+    type: string
     default: ""
   - name: organization_email
     description: "Organization Email"
