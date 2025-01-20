@@ -1,9 +1,13 @@
 # Module configuration
 org:
-  name: "{{ .requiredVariables.organization_name.DefaultValuePlaceholder }}"
-  organization_unit: "{{ .requiredVariables.organization_unit.DefaultValuePlaceholder }}"
-  environment_type: "{{ .requiredVariables.environment_type.DefaultValuePlaceholder }}"
-  environment_name: "{{ .requiredVariables.environment_name.DefaultValuePlaceholder }}"
-  email: "{{ .requiredVariables.organization_email.DefaultValuePlaceholder }}"
-#allow_billing_access: {{ .optionalVariables.organization_allow_billing_access.DefaultValue }}
-#allow_group: {{ .optionalVariables.allow_group.DefaultValue }}
+  # Required variables
+  {{ range .requiredVariables }}
+  # Description {{ .Description }} , Type: {{ .Type }}
+  {{ .Name }}: {{ .DefaultValuePlaceholder }}
+  {{ end }}
+# Optional variables
+{{ range .optionalVariables }}
+# Description {{ .Description }} , Type: {{ .Type }}
+#{{ .Name }}: {{ .DefaultValue }}
+{{ end }}
+

@@ -21,8 +21,7 @@ terraform {
 inputs = {
   ## Required
   {{ range .requiredVariables }}
-  # Description {{ .Description }} , Type: {{ .Type }}
-  {{ .Name }} = local.local_vars.org.{{ .DefaultValuePlaceholder }} # TODO: fill in value
+  {{ .Name }} = local.local_vars.org.{{ .Name }}
   {{ end }}
 
   ## Optional
