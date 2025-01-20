@@ -20,9 +20,9 @@ terraform {
 
 inputs = {
   ## Required
-  {{ range .requiredVariables }}
+  {{- range .requiredVariables }}
   {{ .Name }} = local.local_vars.org.{{ .Name }}
-  {{ end }}
+  {{- end }}
 
   ## Optional
   {{- range .optionalVariables }}
@@ -30,5 +30,5 @@ inputs = {
   {{ .Name }} = try(local.local_vars.{{ .Name }}, {{ .DefaultValue }})
   {{- end }}
   {{- end }}
-  extra_tags                        = local.tags
+  extra_tags = local.tags
 }
