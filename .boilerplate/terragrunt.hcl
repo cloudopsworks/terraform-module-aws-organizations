@@ -25,8 +25,10 @@ inputs = {
   {{ end }}
 
   ## Optional
-  {{ range .optionalVariables }}
+  {{- range .optionalVariables }}
+  {{- if ne .Name "extra_tags" }}
   {{ .Name }} = try(local.local_vars.{{ .Name }}, {{ .DefaultValue }})
-  {{ end }}
+  {{- end }}
+  {{- end }}
   extra_tags                        = local.tags
 }
