@@ -4,10 +4,10 @@
 #            Distributed Under Apache v2.0 License
 #
 variables:
-#  - name: organization_name
-#    description: "Organization Name"
-#    type: string
-#    default: ""
+  - name: organization_name
+    description: "Organization Name"
+    type: string
+    default: ""
 #  - Name: organization_unit
 #    Description: "Organization Unit"
 #    type: string
