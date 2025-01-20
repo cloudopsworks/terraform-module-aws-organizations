@@ -19,12 +19,15 @@ terraform {
 }
 
 inputs = {
-  organization_name                 = local.local_vars.org.name
-  organization_unit                 = local.local_vars.org.organization_unit
-  environment_type                  = local.local_vars.org.environment_type
-  environment_name                  = local.local_vars.org.environment_name
-  organization_email                = local.local_vars.org.email
-  organization_allow_billing_access = try(local.local_vars.allow_billing_access, {{ .optionalVariables.organization_allow_billing_access.DefaultValue }})
-  allow_group                       = try(local.local_vars.allow_group, {{ .opionalVariables.allow_group.DefaultValue }})
+  ## Required
+  {{ range .requiredVariables }}
+  # Description {{ .Description }} , Type: {{ .Type }}
+  {{ .Name }} = local.local_vars.org.{{ .DefaultValuePlaceholder }} # TODO: fill in value
+  {{ end }}
+
+  ## Optional
+  {{ range .optionalVariables }}
+  {{ .Name }} = try(local.local_vars.{{ .Name }}, {{ .DefaultValue }})
+  {{ end }}
   extra_tags                        = local.tags
 }
