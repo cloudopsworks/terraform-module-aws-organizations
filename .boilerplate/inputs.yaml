@@ -1,11 +1,11 @@
 # Module configuration
 org:
   # Required variables
-  {{- range .requiredVariables }}
+  {{- range $tf := .requiredVariables }}
   # Description {{ .Description }} , Type: {{ .Type }}
-  {{ .Name }}: {{ .DefaultValuePlaceholder }}
-
+  {{ $tf.Name }}: {{- index . $tf.Name }}
   {{- end }}
+
 # Optional variables
 {{- range .optionalVariables }}
 # Description {{ .Description }} , Type: {{ .Type }}

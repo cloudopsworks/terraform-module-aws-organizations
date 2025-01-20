@@ -1,1 +1,1 @@
-{}
+{{- .variables.tags | toJSON }}
