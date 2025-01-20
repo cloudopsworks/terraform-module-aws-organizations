@@ -16,11 +16,11 @@ terraform {
 
 inputs = {
   ## Required
-  organization_name: {{ .organization_name }}
-  organization_unit: {{ .organization_unit }}
-  environment_name: {{ .environment_name }}
-  environment_type: {{ .environment_type }}
-  organization_email: {{ .organization_email }}
+  organization_name = {{ .organization_name | quote }}
+  organization_unit = {{ .organization_unit | quote }}
+  environment_name = {{ .environment_name | quote }}
+  environment_type = {{ .environment_type | quote }}
+  organization_email = {{ .organization_email | quote }}
 
   ## Optional
   {{- range .optionalVariables }}
