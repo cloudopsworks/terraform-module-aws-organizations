@@ -7,23 +7,23 @@ variables:
   - name: organization_name
     description: "Organization Name"
     type: string
-    #default: ""
+    default: "Organization"
   - name: organization_unit
     Description: "Organization Unit"
     type: string
-#    default: ""
+    default: "Unit"
   - name: environment_name
     description: "Environment Name"
     type: string
-#    default: ""
+    default: "DEV"
   - name: environment_type
     Description: "Environment Type"
     type: string
-#    default: ""
+    default: "Testing"
   - name: organization_email
     description: "Organization Email"
     type: string
-#    default: ""
+    default: "email@sample.com"
 #  - name: organization_allow_billing_access
 #    description: "Allow Billing Access"
 #    type: bool
