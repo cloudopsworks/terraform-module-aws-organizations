@@ -24,10 +24,10 @@ variables:
     description: "Organization Email"
     type: string
     default: "email@sample.com"
-#  - name: organization_allow_billing_access
-#    description: "Allow Billing Access"
-#    type: bool
-#    default: true
+  - name: organization_allow_billing_access
+    description: "Allow Billing Access"
+    type: bool
+    default: true
   - name: tags
     description: "Tags"
     type: map

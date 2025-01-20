@@ -16,15 +16,18 @@ terraform {
 
 inputs = {
   ## Required
-  {{- range .requiredVariables }}
-  {{ .Name }} = local.local_vars.org.{{ .Name }}
-  {{- end }}
+  organization_name: {{ .organization_name }}
+  organization_unit: {{ .organization_unit }}
+  environment_name: {{ .environment_name }}
+  environment_type: {{ .environment_type }}
+  organization_email: {{ .organization_email }}
 
   ## Optional
   {{- range .optionalVariables }}
-  {{- if ne .Name "extra_tags" }}
+  {{- if and (ne .Name "extra_tags") (ne .Name "organization_allow_billing_access") }}
   {{ .Name }} = try(local.local_vars.{{ .Name }}, {{ .DefaultValue }})
   {{- end }}
   {{- end }}
+  organization_allow_billing_access = {{ .organization_allow_billing_access }}
   extra_tags = local.tags
 }
