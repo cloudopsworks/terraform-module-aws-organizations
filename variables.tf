@@ -51,6 +51,7 @@ variable "organization_parent_name" {
   description = "(optional) The parent name of the organization, defaults to: null"
   type        = string
   default     = ""
+  nullable    = false
 }
 
 variable "organization_parent_id" {
