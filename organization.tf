@@ -13,13 +13,20 @@ locals {
   )
 }
 
+data "aws_organizations_organizational_unit" "parent" {
+  count = var.organization_parent_name != "" ? 1 : 0
+  name  = var.organization_parent_name
+}
+
 resource "aws_organizations_account" "org" {
   name                       = var.name == "" ? module.tags.locals.environment_name : var.name
   email                      = var.organization_email
   iam_user_access_to_billing = var.organization_allow_billing_access ? "ALLOW" : "DENY"
   role_name                  = var.organization_role
   close_on_deletion          = false
-  #parent_id                  = var.organization_parent_id
+  parent_id = var.organization_parent_id != "" ? var.organization_parent_id : (
+    var.organization_parent_name != "" ? data.aws_organizations_organizational_unit.parent[0].id : null
+  )
 
   # This is not the best situation but prevents resource regeneration
   # that can mess up an organization
