@@ -13,9 +13,12 @@ locals {
   )
 }
 
-data "aws_organizations_organizational_unit" "parent" {
-  count = var.organization_parent_name != "" ? 1 : 0
-  name  = var.organization_parent_name
+data "aws_organizations_organization" "current" {}
+
+data "aws_organizations_organizational_unit" "ou" {
+  count     = var.organization_parent_name != "" ? 1 : 0
+  parent_id = data.aws_organizations_organization.current.roots[0].id
+  name      = var.organization_parent_name
 }
 
 resource "aws_organizations_account" "org" {
@@ -25,7 +28,7 @@ resource "aws_organizations_account" "org" {
   role_name                  = var.organization_role
   close_on_deletion          = false
   parent_id = var.organization_parent_id != "" ? var.organization_parent_id : (
-    var.organization_parent_name != "" ? data.aws_organizations_organizational_unit.parent[0].id : null
+    var.organization_parent_name != "" ? data.aws_organizations_organizational_unit.ou[0].id : null
   )
 
   # This is not the best situation but prevents resource regeneration
