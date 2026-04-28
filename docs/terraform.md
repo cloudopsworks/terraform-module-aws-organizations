@@ -2,13 +2,14 @@
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.2 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.3 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 6.4 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | n/a |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | ~> 6.4 |
 
 ## Modules
 
@@ -22,6 +23,9 @@
 | Name | Type |
 |------|------|
 | [aws_organizations_account.org](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/organizations_account) | resource |
+| [aws_organizations_organization.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/organizations_organization) | data source |
+| [aws_organizations_organizational_unit.ou](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/organizations_organizational_unit) | data source |
+| [aws_region.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |
 
 ## Inputs
 
@@ -37,7 +41,8 @@
 | <a name="input_organization_allow_billing_access"></a> [organization\_allow\_billing\_access](#input\_organization\_allow\_billing\_access) | (optional) Allow IAM users to access billing, defaults to: true | `bool` | `true` | no |
 | <a name="input_organization_email"></a> [organization\_email](#input\_organization\_email) | (required) The email of the organization | `string` | n/a | yes |
 | <a name="input_organization_name"></a> [organization\_name](#input\_organization\_name) | (required) The name of the organization | `string` | n/a | yes |
-| <a name="input_organization_parent_id"></a> [organization\_parent\_id](#input\_organization\_parent\_id) | (optional) The parent id of the organization, defaults to: null | `string` | `null` | no |
+| <a name="input_organization_parent_id"></a> [organization\_parent\_id](#input\_organization\_parent\_id) | (optional) The parent id of the organization, defaults to: null | `string` | `""` | no |
+| <a name="input_organization_parent_name"></a> [organization\_parent\_name](#input\_organization\_parent\_name) | (optional) The parent name of the organization, defaults to: null | `string` | `""` | no |
 | <a name="input_organization_role"></a> [organization\_role](#input\_organization\_role) | (optional) The role name for default Admin assumerole in organization, defaults to: OrganizationAllowAllAccessAssumeRole | `string` | `"OrganizationAllowAllAccessAssumeRole"` | no |
 | <a name="input_organization_unit"></a> [organization\_unit](#input\_organization\_unit) | (required) The organization unit | `string` | n/a | yes |
 
