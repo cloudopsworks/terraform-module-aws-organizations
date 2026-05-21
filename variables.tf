@@ -1,85 +1,49 @@
 ##
-# (c) 2024 - Cloud Ops Works LLC - https://cloudops.works/
-#            On GitHub: https://github.com/cloudopsworks
-#            Distributed Under Apache v2.0 License
+# (c) 2021-2026
+#     Cloud Ops Works LLC - https://cloudops.works/
+#     Find us on:
+#       GitHub: https://github.com/cloudopsworks
+#       WebSite: https://cloudops.works
+#     Distributed Under Apache v2.0 License
 #
 
-variable "name" {
-  description = "(optional) The name of the account, defaults to: \"\""
-  type        = string
-  default     = ""
-}
-
-variable "organization_name" {
-  description = "(required) The name of the organization"
-  type        = string
-}
-
-variable "organization_unit" {
-  description = "(required) The organization unit"
-  type        = string
-}
-
-variable "environment_type" {
-  description = "(required) The environment type"
-  type        = string
-}
-
-variable "environment_name" {
-  description = "(required) The environment name"
-  type        = string
-}
-
-variable "organization_email" {
-  description = "(required) The email of the organization"
-  type        = string
-}
-
-variable "organization_role" {
-  description = "(optional) The role name for default Admin assumerole in organization, defaults to: OrganizationAllowAllAccessAssumeRole"
-  type        = string
-  default     = "OrganizationAllowAllAccessAssumeRole"
-}
-
-variable "organization_allow_billing_access" {
-  description = "(optional) Allow IAM users to access billing, defaults to: true"
-  type        = bool
-  default     = true
-}
-
-variable "organization_parent_name" {
-  description = "(optional) The parent name of the organization, defaults to: null"
-  type        = string
-  default     = ""
-  nullable    = false
-}
-
-variable "organization_parent_id" {
-  description = "(optional) The parent id of the organization, defaults to: null"
-  type        = string
-  default     = ""
-}
-
-variable "extra_tags" {
-  description = "(optional) Extra tags to add to the organization, format { key = value }, defaults to: {}"
-  type        = map(string)
-  default     = {}
-}
-
-variable "allow_group" {
-  description = "(optional) The group to allow access to the organization, defaults to: false"
+# is_hub: false # (Optional) Is this a hub or spoke configuration? Default: false
+variable "is_hub" {
+  description = "Is this a hub or spoke configuration?"
   type        = bool
   default     = false
 }
 
-variable "allowsts_group" {
-  description = "(optional) The group to allow access to the organization, defaults to: terraform-access"
+# spoke_def: "001" # (Optional) Spoke ID Number, must be a 3 digit number. Default: "001"
+variable "spoke_def" {
+  description = "Spoke ID Number, must be a 3 digit number"
   type        = string
-  default     = "terraform-access"
+  default     = "001"
+  validation {
+    condition     = (length(var.spoke_def) == 3) && tonumber(var.spoke_def) != null
+    error_message = "The spoke_def must be a 3 digit number as string."
+  }
 }
 
-variable "access_role" {
-  description = "(optional) The role to allow access to the organization, defaults to: TerraformRole"
-  type        = string
-  default     = "TerraformRole"
+# org: # (Required) Organization details
+#   organization_name: "example" # (Required) The name of the organization
+#   organization_unit: "devops"  # (Required) The unit within the organization
+#   environment_type: "production" # (Required) The type of environment (e.g. production, staging)
+#   environment_name: "prod"      # (Required) The name of the environment
+variable "org" {
+  description = "Organization details"
+  type = object({
+    organization_name = string
+    organization_unit = string
+    environment_type  = string
+    environment_name  = string
+  })
+}
+
+# extra_tags: # (Optional) Extra tags to add to the resources. Default: {}
+#   Tag1: "Value1"
+variable "extra_tags" {
+  description = "Extra tags to add to the resources"
+  type        = map(string)
+  default     = {}
 }

@@ -1,30 +1,177 @@
-name: Terraform Organizations Module
+name: Terraform AWS Organizations Module
 #logo: logo/logo.jpg
+
+badges:
+  - name: Latest Release
+    image: https://img.shields.io/github/release/cloudopsworks/terraform-module-aws-organizations.svg?style=for-the-badge
+    url: https://github.com/cloudopsworks/terraform-module-aws-organizations/releases/latest
+  - name: Last Updated
+    image: https://img.shields.io/github/last-commit/cloudopsworks/terraform-module-aws-organizations.svg?style=for-the-badge
+    url: https://github.com/cloudopsworks/terraform-module-aws-organizations/commits
 
 license: "APACHE2"
 
 copyrights:
   - name: "Cloud Ops Works LLC"
     url: "https://cloudops.works"
-    year: "2024"
+    year: "2021"
 
-github_repo: cloudopsworks/terraform-aws-organizations
+github_repo: cloudopsworks/terraform-module-aws-organizations
 
 description: |-
-  Organizations Module for AWS organization management.
+  Terraform module for provisioning and managing AWS Organizations member accounts.
+  Supports placement in an Organizational Unit by name or ID, optional IAM billing
+  access, and optional cross-account assume-role group policy attachment.
 
-# Introduction to the project
-#introduction: |-
-#  This is an introduction.
+introduction: |-
+  This module creates an AWS Organizations member account under a specified parent
+  Organizational Unit and optionally wires up cross-account IAM access via an
+  assume-role group policy.
 
-# How to use this project
-#usage: |-
+  Key capabilities:
+  - Creates a new AWS Organizations account with a configurable root IAM role.
+  - Places the account in a target OU by name (`organization_parent_name`) or
+    by ID (`organization_parent_id`).
+  - Optionally enables IAM user access to the billing console.
+  - Optionally attaches a cross-account assume-role policy to a named IAM group
+    (`allow_group`, `allowsts_group`, `access_role`).
+  - Lifecycle-protects the account name, role, and billing setting after creation
+    to prevent inadvertent resource recreation.
 
-# Example usage
-#examples: |-
+  **Note:** The module is designed to run inside a Terragrunt hierarchy that
+  supplies `org`, `spoke_def`, `is_hub`, and `extra_tags` automatically from
+  parent `env-inputs.yaml`, `spoke-inputs.yaml`, and tag files. Only the
+  account-specific variables in `inputs.yaml` need to be supplied per deployment.
 
-# How to get started quickly
-#quickstart: |-
+usage: |-
+  ### Terragrunt Scaffolding
+
+  ```sh
+  # 1. Create and enter the target deployment directory
+  mkdir -p <environment>/<region>/<spoke>/organizations
+  cd <environment>/<region>/<spoke>/organizations
+
+  # 2. Scaffold the module (do NOT use --working-dir)
+  terragrunt scaffold github.com/cloudopsworks/terraform-module-aws-organizations
+
+  # 3. Edit inputs.yaml with account-specific values
+  vi inputs.yaml
+
+  # 4. Apply
+  terragrunt apply
+  ```
+
+  ### Generated `inputs.yaml`
+
+  ```yaml
+  # organization_email: "admin@example.com"  # (Required) Root user email for the new AWS account.
+  organization_email: "admin@example.com"
+
+  # name: ""  # (Optional) Display name of the account. Defaults to environment name tag. Default: ""
+  #name: ""
+
+  # organization_role: "OrganizationAllowAllAccessAssumeRole"  # (Optional) IAM role created for cross-account access. Default: "OrganizationAllowAllAccessAssumeRole"
+  #organization_role: "OrganizationAllowAllAccessAssumeRole"
+
+  # organization_allow_billing_access: true  # (Optional) Allow IAM users billing console access. Default: true
+  #organization_allow_billing_access: true
+
+  # organization_parent_name: ""  # (Optional) Name of the parent OU. Takes precedence over organization_parent_id. Default: ""
+  #organization_parent_name: ""
+
+  # organization_parent_id: ""  # (Optional) ID of the parent OU (e.g. ou-xxxx-xxxxxxxx). Default: ""
+  #organization_parent_id: ""
+
+  # allow_group: false  # (Optional) Create an IAM group assume-role policy. Default: false
+  #allow_group: false
+
+  # allowsts_group: "terraform-access"  # (Optional) IAM group that receives assume-role permissions. Default: "terraform-access"
+  #allowsts_group: "terraform-access"
+
+  # access_role: "TerraformRole"  # (Optional) IAM role to be assumed by the group. Default: "TerraformRole"
+  #access_role: "TerraformRole"
+  ```
+
+  ### Generated `terragrunt.hcl`
+
+  ```hcl
+  locals {
+    local_vars  = yamldecode(file("./inputs.yaml"))
+    spoke_vars  = yamldecode(file(find_in_parent_folders("spoke-inputs.yaml")))
+    region_vars = yamldecode(file(find_in_parent_folders("region-inputs.yaml")))
+    env_vars    = yamldecode(file(find_in_parent_folders("env-inputs.yaml")))
+    global_vars = yamldecode(file(find_in_parent_folders("global-inputs.yaml")))
+
+    local_tags  = jsondecode(file("./local-tags.json"))
+    spoke_tags  = jsondecode(file(find_in_parent_folders("spoke-tags.json")))
+    region_tags = jsondecode(file(find_in_parent_folders("region-tags.json")))
+    env_tags    = jsondecode(file(find_in_parent_folders("env-tags.json")))
+    global_tags = jsondecode(file(find_in_parent_folders("global-tags.json")))
+
+    tags = merge(
+      local.global_tags,
+      local.env_tags,
+      local.region_tags,
+      local.spoke_tags,
+      local.local_tags
+    )
+  }
+
+  include "root" {
+    path = find_in_parent_folders("root.hcl")
+  }
+
+  terraform {
+    source = "github.com/cloudopsworks/terraform-module-aws-organizations//<version>"
+  }
+
+  inputs = {
+    is_hub     = false
+    org        = local.env_vars.org
+    spoke_def  = local.spoke_vars.spoke
+    organization_email = local.local_vars.organization_email
+    organization_role                 = try(local.local_vars.organization_role, "OrganizationAllowAllAccessAssumeRole")
+    organization_allow_billing_access = try(local.local_vars.organization_allow_billing_access, true)
+    organization_parent_name          = try(local.local_vars.organization_parent_name, "")
+    organization_parent_id            = try(local.local_vars.organization_parent_id, "")
+    allow_group                       = try(local.local_vars.allow_group, false)
+    allowsts_group                    = try(local.local_vars.allowsts_group, "terraform-access")
+    access_role                       = try(local.local_vars.access_role, "TerraformRole")
+    extra_tags = local.tags
+  }
+  ```
+
+examples: |-
+  ### Minimal — place account in a named OU
+
+  ```yaml
+  # inputs.yaml
+  organization_email: "sandbox-001@example.com"
+  organization_parent_name: "Sandbox"
+  ```
+
+  ### Full — with billing access and cross-account group policy
+
+  ```yaml
+  # inputs.yaml
+  organization_email: "prod-001@example.com"
+  name: "production-account-001"
+  organization_role: "OrganizationAllowAllAccessAssumeRole"
+  organization_allow_billing_access: true
+  organization_parent_name: "Production"
+  allow_group: true
+  allowsts_group: "terraform-access"
+  access_role: "TerraformRole"
+  ```
+
+quickstart: |-
+  ```sh
+  mkdir -p prod/us-east-1/001/organizations
+  cd prod/us-east-1/001/organizations
+  terragrunt scaffold github.com/cloudopsworks/terraform-module-aws-organizations
+  # Edit inputs.yaml — set organization_email at minimum
+  terragrunt apply
+  ```
 
 include:
   - "docs/targets.md"

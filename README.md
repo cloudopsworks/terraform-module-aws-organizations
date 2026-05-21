@@ -10,10 +10,12 @@
 
 [![cloudopsworks][logo]](https://cloudopsworks.co/)
 
-# Terraform Organizations Module
+# Terraform AWS Organizations Module [![Latest Release](https://img.shields.io/github/release/cloudopsworks/terraform-module-aws-organizations.svg?style=for-the-badge)](https://github.com/cloudopsworks/terraform-module-aws-organizations/releases/latest) [![Last Updated](https://img.shields.io/github/last-commit/cloudopsworks/terraform-module-aws-organizations.svg?style=for-the-badge)](https://github.com/cloudopsworks/terraform-module-aws-organizations/commits)
 
 
-Organizations Module for AWS organization management.
+Terraform module for provisioning and managing AWS Organizations member accounts.
+Supports placement in an Organizational Unit by name or ID, optional IAM billing
+access, and optional cross-account assume-role group policy attachment.
 
 
 ---
@@ -39,10 +41,162 @@ It's 100% Open Source and licensed under the [APACHE2](LICENSE).
 
 
 
+## Introduction
+
+This module creates an AWS Organizations member account under a specified parent
+Organizational Unit and optionally wires up cross-account IAM access via an
+assume-role group policy.
+
+Key capabilities:
+- Creates a new AWS Organizations account with a configurable root IAM role.
+- Places the account in a target OU by name (`organization_parent_name`) or
+  by ID (`organization_parent_id`).
+- Optionally enables IAM user access to the billing console.
+- Optionally attaches a cross-account assume-role policy to a named IAM group
+  (`allow_group`, `allowsts_group`, `access_role`).
+- Lifecycle-protects the account name, role, and billing setting after creation
+  to prevent inadvertent resource recreation.
+
+**Note:** The module is designed to run inside a Terragrunt hierarchy that
+supplies `org`, `spoke_def`, `is_hub`, and `extra_tags` automatically from
+parent `env-inputs.yaml`, `spoke-inputs.yaml`, and tag files. Only the
+account-specific variables in `inputs.yaml` need to be supplied per deployment.
+
+## Usage
 
 
 
+### Terragrunt Scaffolding
 
+```sh
+# 1. Create and enter the target deployment directory
+mkdir -p <environment>/<region>/<spoke>/organizations
+cd <environment>/<region>/<spoke>/organizations
+
+# 2. Scaffold the module (do NOT use --working-dir)
+terragrunt scaffold github.com/cloudopsworks/terraform-module-aws-organizations
+
+# 3. Edit inputs.yaml with account-specific values
+vi inputs.yaml
+
+# 4. Apply
+terragrunt apply
+```
+
+### Generated `inputs.yaml`
+
+```yaml
+# organization_email: "admin@example.com"  # (Required) Root user email for the new AWS account.
+organization_email: "admin@example.com"
+
+# name: ""  # (Optional) Display name of the account. Defaults to environment name tag. Default: ""
+#name: ""
+
+# organization_role: "OrganizationAllowAllAccessAssumeRole"  # (Optional) IAM role created for cross-account access. Default: "OrganizationAllowAllAccessAssumeRole"
+#organization_role: "OrganizationAllowAllAccessAssumeRole"
+
+# organization_allow_billing_access: true  # (Optional) Allow IAM users billing console access. Default: true
+#organization_allow_billing_access: true
+
+# organization_parent_name: ""  # (Optional) Name of the parent OU. Takes precedence over organization_parent_id. Default: ""
+#organization_parent_name: ""
+
+# organization_parent_id: ""  # (Optional) ID of the parent OU (e.g. ou-xxxx-xxxxxxxx). Default: ""
+#organization_parent_id: ""
+
+# allow_group: false  # (Optional) Create an IAM group assume-role policy. Default: false
+#allow_group: false
+
+# allowsts_group: "terraform-access"  # (Optional) IAM group that receives assume-role permissions. Default: "terraform-access"
+#allowsts_group: "terraform-access"
+
+# access_role: "TerraformRole"  # (Optional) IAM role to be assumed by the group. Default: "TerraformRole"
+#access_role: "TerraformRole"
+```
+
+### Generated `terragrunt.hcl`
+
+```hcl
+locals {
+  local_vars  = yamldecode(file("./inputs.yaml"))
+  spoke_vars  = yamldecode(file(find_in_parent_folders("spoke-inputs.yaml")))
+  region_vars = yamldecode(file(find_in_parent_folders("region-inputs.yaml")))
+  env_vars    = yamldecode(file(find_in_parent_folders("env-inputs.yaml")))
+  global_vars = yamldecode(file(find_in_parent_folders("global-inputs.yaml")))
+
+  local_tags  = jsondecode(file("./local-tags.json"))
+  spoke_tags  = jsondecode(file(find_in_parent_folders("spoke-tags.json")))
+  region_tags = jsondecode(file(find_in_parent_folders("region-tags.json")))
+  env_tags    = jsondecode(file(find_in_parent_folders("env-tags.json")))
+  global_tags = jsondecode(file(find_in_parent_folders("global-tags.json")))
+
+  tags = merge(
+    local.global_tags,
+    local.env_tags,
+    local.region_tags,
+    local.spoke_tags,
+    local.local_tags
+  )
+}
+
+include "root" {
+  path = find_in_parent_folders("root.hcl")
+}
+
+terraform {
+  source = "github.com/cloudopsworks/terraform-module-aws-organizations//<version>"
+}
+
+inputs = {
+  is_hub     = false
+  org        = local.env_vars.org
+  spoke_def  = local.spoke_vars.spoke
+  organization_email = local.local_vars.organization_email
+  organization_role                 = try(local.local_vars.organization_role, "OrganizationAllowAllAccessAssumeRole")
+  organization_allow_billing_access = try(local.local_vars.organization_allow_billing_access, true)
+  organization_parent_name          = try(local.local_vars.organization_parent_name, "")
+  organization_parent_id            = try(local.local_vars.organization_parent_id, "")
+  allow_group                       = try(local.local_vars.allow_group, false)
+  allowsts_group                    = try(local.local_vars.allowsts_group, "terraform-access")
+  access_role                       = try(local.local_vars.access_role, "TerraformRole")
+  extra_tags = local.tags
+}
+```
+
+## Quick Start
+
+```sh
+mkdir -p prod/us-east-1/001/organizations
+cd prod/us-east-1/001/organizations
+terragrunt scaffold github.com/cloudopsworks/terraform-module-aws-organizations
+# Edit inputs.yaml — set organization_email at minimum
+terragrunt apply
+```
+
+
+## Examples
+
+### Minimal — place account in a named OU
+
+```yaml
+# inputs.yaml
+organization_email: "sandbox-001@example.com"
+organization_parent_name: "Sandbox"
+```
+
+### Full — with billing access and cross-account group policy
+
+```yaml
+# inputs.yaml
+organization_email: "prod-001@example.com"
+name: "production-account-001"
+organization_role: "OrganizationAllowAllAccessAssumeRole"
+organization_allow_billing_access: true
+organization_parent_name: "Production"
+allow_group: true
+allowsts_group: "terraform-access"
+access_role: "TerraformRole"
+```
 
 
 
@@ -91,31 +245,30 @@ Available targets:
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_access_role"></a> [access\_role](#input\_access\_role) | (optional) The role to allow access to the organization, defaults to: TerraformRole | `string` | `"TerraformRole"` | no |
-| <a name="input_allow_group"></a> [allow\_group](#input\_allow\_group) | (optional) The group to allow access to the organization, defaults to: false | `bool` | `false` | no |
-| <a name="input_allowsts_group"></a> [allowsts\_group](#input\_allowsts\_group) | (optional) The group to allow access to the organization, defaults to: terraform-access | `string` | `"terraform-access"` | no |
-| <a name="input_environment_name"></a> [environment\_name](#input\_environment\_name) | (required) The environment name | `string` | n/a | yes |
-| <a name="input_environment_type"></a> [environment\_type](#input\_environment\_type) | (required) The environment type | `string` | n/a | yes |
-| <a name="input_extra_tags"></a> [extra\_tags](#input\_extra\_tags) | (optional) Extra tags to add to the organization, format { key = value }, defaults to: {} | `map(string)` | `{}` | no |
-| <a name="input_name"></a> [name](#input\_name) | (optional) The name of the account, defaults to: "" | `string` | `""` | no |
-| <a name="input_organization_allow_billing_access"></a> [organization\_allow\_billing\_access](#input\_organization\_allow\_billing\_access) | (optional) Allow IAM users to access billing, defaults to: true | `bool` | `true` | no |
-| <a name="input_organization_email"></a> [organization\_email](#input\_organization\_email) | (required) The email of the organization | `string` | n/a | yes |
-| <a name="input_organization_name"></a> [organization\_name](#input\_organization\_name) | (required) The name of the organization | `string` | n/a | yes |
-| <a name="input_organization_parent_id"></a> [organization\_parent\_id](#input\_organization\_parent\_id) | (optional) The parent id of the organization, defaults to: null | `string` | `""` | no |
-| <a name="input_organization_parent_name"></a> [organization\_parent\_name](#input\_organization\_parent\_name) | (optional) The parent name of the organization, defaults to: null | `string` | `""` | no |
-| <a name="input_organization_role"></a> [organization\_role](#input\_organization\_role) | (optional) The role name for default Admin assumerole in organization, defaults to: OrganizationAllowAllAccessAssumeRole | `string` | `"OrganizationAllowAllAccessAssumeRole"` | no |
-| <a name="input_organization_unit"></a> [organization\_unit](#input\_organization\_unit) | (required) The organization unit | `string` | n/a | yes |
+| <a name="input_access_role"></a> [access\_role](#input\_access\_role) | (optional) Name of the IAM role to be assumed in this account by the allowsts\_group. Default: TerraformRole | `string` | `"TerraformRole"` | no |
+| <a name="input_allow_group"></a> [allow\_group](#input\_allow\_group) | (optional) Whether to create an IAM group policy allowing assume-role access into this account. Default: false | `bool` | `false` | no |
+| <a name="input_allowsts_group"></a> [allowsts\_group](#input\_allowsts\_group) | (optional) Name of the IAM group that receives assume-role permissions into this account. Default: terraform-access | `string` | `"terraform-access"` | no |
+| <a name="input_extra_tags"></a> [extra\_tags](#input\_extra\_tags) | Extra tags to add to the resources | `map(string)` | `{}` | no |
+| <a name="input_is_hub"></a> [is\_hub](#input\_is\_hub) | Is this a hub or spoke configuration? | `bool` | `false` | no |
+| <a name="input_name"></a> [name](#input\_name) | (optional) The display name of the AWS Organizations account. Defaults to the environment name from tags when empty. | `string` | `""` | no |
+| <a name="input_org"></a> [org](#input\_org) | Organization details | <pre>object({<br/>    organization_name = string<br/>    organization_unit = string<br/>    environment_type  = string<br/>    environment_name  = string<br/>  })</pre> | n/a | yes |
+| <a name="input_organization_allow_billing_access"></a> [organization\_allow\_billing\_access](#input\_organization\_allow\_billing\_access) | (optional) Whether IAM users are allowed access to the billing console. Default: true | `bool` | `true` | no |
+| <a name="input_organization_email"></a> [organization\_email](#input\_organization\_email) | (required) The root user email address for the AWS Organizations account. | `string` | n/a | yes |
+| <a name="input_organization_parent_id"></a> [organization\_parent\_id](#input\_organization\_parent\_id) | (optional) ID of the parent Organizational Unit (e.g. ou-xxxx-xxxxxxxx). Default: "" | `string` | `""` | no |
+| <a name="input_organization_parent_name"></a> [organization\_parent\_name](#input\_organization\_parent\_name) | (optional) Name of the parent Organizational Unit. Mutually exclusive with organization\_parent\_id; this takes precedence. Default: "" | `string` | `""` | no |
+| <a name="input_organization_role"></a> [organization\_role](#input\_organization\_role) | (optional) IAM role name created in the account for cross-account access. Default: OrganizationAllowAllAccessAssumeRole | `string` | `"OrganizationAllowAllAccessAssumeRole"` | no |
+| <a name="input_spoke_def"></a> [spoke\_def](#input\_spoke\_def) | Spoke ID Number, must be a 3 digit number | `string` | `"001"` | no |
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
-| <a name="output_account_arn"></a> [account\_arn](#output\_account\_arn) | Organization Account ARN |
-| <a name="output_account_assume_role_id"></a> [account\_assume\_role\_id](#output\_account\_assume\_role\_id) | Account Assume Role |
-| <a name="output_account_console_url"></a> [account\_console\_url](#output\_account\_console\_url) | Account Console URL |
-| <a name="output_account_id"></a> [account\_id](#output\_account\_id) | Organization Account ID |
-| <a name="output_account_name"></a> [account\_name](#output\_account\_name) | Organization Account Name |
-| <a name="output_account_tags"></a> [account\_tags](#output\_account\_tags) | Account Tags |
+| <a name="output_account_arn"></a> [account\_arn](#output\_account\_arn) | The ARN of the provisioned AWS Organizations account. |
+| <a name="output_account_assume_role_id"></a> [account\_assume\_role\_id](#output\_account\_assume\_role\_id) | Full ARN of the default cross-account assume-role for the provisioned account. |
+| <a name="output_account_console_url"></a> [account\_console\_url](#output\_account\_console\_url) | AWS Console sign-in URL scoped to the provisioned account. |
+| <a name="output_account_id"></a> [account\_id](#output\_account\_id) | The AWS account ID of the provisioned Organizations account. |
+| <a name="output_account_name"></a> [account\_name](#output\_account\_name) | The display name of the provisioned AWS Organizations account. |
+| <a name="output_account_tags"></a> [account\_tags](#output\_account\_tags) | Map of organization-level metadata tags applied to the provisioned account. |
 
 
 
@@ -123,7 +276,7 @@ Available targets:
 
 **Got a question?** We got answers. 
 
-File a GitHub [issue](https://github.com/cloudopsworks/terraform-aws-organizations/issues), send us an [email][email] or join our [Slack Community][slack].
+File a GitHub [issue](https://github.com/cloudopsworks/terraform-module-aws-organizations/issues), send us an [email][email] or join our [Slack Community][slack].
 
 
 ## DevOps Tools
@@ -139,7 +292,7 @@ File a GitHub [issue](https://github.com/cloudopsworks/terraform-aws-organizatio
 
 ### Bug Reports & Feature Requests
 
-Please use the [issue tracker](https://github.com/cloudopsworks/terraform-aws-organizations/issues) to report any bugs or file feature requests.
+Please use the [issue tracker](https://github.com/cloudopsworks/terraform-module-aws-organizations/issues) to report any bugs or file feature requests.
 
 ### Developing
 
@@ -148,7 +301,7 @@ Please use the [issue tracker](https://github.com/cloudopsworks/terraform-aws-or
 
 ## Copyrights
 
-Copyright © 2024-2026 [Cloud Ops Works LLC](https://cloudops.works)
+Copyright © 2021-2026 [Cloud Ops Works LLC](https://cloudops.works)
 
 
 
@@ -206,30 +359,30 @@ This project is maintained by [Cloud Ops Works LLC][website].
 [![Beacon][beacon]][website]
 
   [logo]: https://cloudopsworks.co/images/main-logo.png
-  [docs]: https://cloudopsworks.co/resources?utm_source=github&utm_medium=readme&utm_campaign=cloudopsworks/terraform-aws-organizations&utm_content=docs
-  [website]: https://cloudopsworks.co?utm_source=github&utm_medium=readme&utm_campaign=cloudopsworks/terraform-aws-organizations&utm_content=website
-  [github]: https://cloudopsworks.co/github?utm_source=github&utm_medium=readme&utm_campaign=cloudopsworks/terraform-aws-organizations&utm_content=github
-  [jobs]: https://cloudopsworks.co/jobs?utm_source=github&utm_medium=readme&utm_campaign=cloudopsworks/terraform-aws-organizations&utm_content=jobs
-  [hire]: https://cloudopsworks.co/hire?utm_source=github&utm_medium=readme&utm_campaign=cloudopsworks/terraform-aws-organizations&utm_content=hire
-  [slack]: https://cloudopsworks.co/slack?utm_source=github&utm_medium=readme&utm_campaign=cloudopsworks/terraform-aws-organizations&utm_content=slack
-  [linkedin]: https://cloudopsworks.co/linkedin?utm_source=github&utm_medium=readme&utm_campaign=cloudopsworks/terraform-aws-organizations&utm_content=linkedin
-  [x]: https://cloudopsworks.co/x?utm_source=github&utm_medium=readme&utm_campaign=cloudopsworks/terraform-aws-organizations&utm_content=x
-  [testimonial]: https://cloudopsworks.co/case-studies?utm_source=github&utm_medium=readme&utm_campaign=cloudopsworks/terraform-aws-organizations&utm_content=testimonial
-  [office_hours]: https://cloudopsworks.co/office-hours?utm_source=github&utm_medium=readme&utm_campaign=cloudopsworks/terraform-aws-organizations&utm_content=office_hours
-  [newsletter]: https://cloudopsworks.co/resources?utm_source=github&utm_medium=readme&utm_campaign=cloudopsworks/terraform-aws-organizations&utm_content=newsletter
-  [email]: https://cloudopsworks.co/contact?utm_source=github&utm_medium=readme&utm_campaign=cloudopsworks/terraform-aws-organizations&utm_content=email
-  [commercial_support]: https://cloudopsworks.co/services?utm_source=github&utm_medium=readme&utm_campaign=cloudopsworks/terraform-aws-organizations&utm_content=commercial_support
-  [we_love_open_source]: https://cloudopsworks.co/open-source?utm_source=github&utm_medium=readme&utm_campaign=cloudopsworks/terraform-aws-organizations&utm_content=we_love_open_source
-  [terraform_modules]: https://cloudopsworks.co/open-source?utm_source=github&utm_medium=readme&utm_campaign=cloudopsworks/terraform-aws-organizations&utm_content=terraform_modules
+  [docs]: https://cloudopsworks.co/resources?utm_source=github&utm_medium=readme&utm_campaign=cloudopsworks/terraform-module-aws-organizations&utm_content=docs
+  [website]: https://cloudopsworks.co?utm_source=github&utm_medium=readme&utm_campaign=cloudopsworks/terraform-module-aws-organizations&utm_content=website
+  [github]: https://cloudopsworks.co/github?utm_source=github&utm_medium=readme&utm_campaign=cloudopsworks/terraform-module-aws-organizations&utm_content=github
+  [jobs]: https://cloudopsworks.co/jobs?utm_source=github&utm_medium=readme&utm_campaign=cloudopsworks/terraform-module-aws-organizations&utm_content=jobs
+  [hire]: https://cloudopsworks.co/hire?utm_source=github&utm_medium=readme&utm_campaign=cloudopsworks/terraform-module-aws-organizations&utm_content=hire
+  [slack]: https://cloudopsworks.co/slack?utm_source=github&utm_medium=readme&utm_campaign=cloudopsworks/terraform-module-aws-organizations&utm_content=slack
+  [linkedin]: https://cloudopsworks.co/linkedin?utm_source=github&utm_medium=readme&utm_campaign=cloudopsworks/terraform-module-aws-organizations&utm_content=linkedin
+  [x]: https://cloudopsworks.co/x?utm_source=github&utm_medium=readme&utm_campaign=cloudopsworks/terraform-module-aws-organizations&utm_content=x
+  [testimonial]: https://cloudopsworks.co/case-studies?utm_source=github&utm_medium=readme&utm_campaign=cloudopsworks/terraform-module-aws-organizations&utm_content=testimonial
+  [office_hours]: https://cloudopsworks.co/office-hours?utm_source=github&utm_medium=readme&utm_campaign=cloudopsworks/terraform-module-aws-organizations&utm_content=office_hours
+  [newsletter]: https://cloudopsworks.co/resources?utm_source=github&utm_medium=readme&utm_campaign=cloudopsworks/terraform-module-aws-organizations&utm_content=newsletter
+  [email]: https://cloudopsworks.co/contact?utm_source=github&utm_medium=readme&utm_campaign=cloudopsworks/terraform-module-aws-organizations&utm_content=email
+  [commercial_support]: https://cloudopsworks.co/services?utm_source=github&utm_medium=readme&utm_campaign=cloudopsworks/terraform-module-aws-organizations&utm_content=commercial_support
+  [we_love_open_source]: https://cloudopsworks.co/open-source?utm_source=github&utm_medium=readme&utm_campaign=cloudopsworks/terraform-module-aws-organizations&utm_content=we_love_open_source
+  [terraform_modules]: https://cloudopsworks.co/open-source?utm_source=github&utm_medium=readme&utm_campaign=cloudopsworks/terraform-module-aws-organizations&utm_content=terraform_modules
   [readme_header_img]: https://cloudopsworks.co/images/readme-header.png
-  [readme_header_link]: https://cloudopsworks.co/readme/header/link?utm_source=github&utm_medium=readme&utm_campaign=cloudopsworks/terraform-aws-organizations&utm_content=readme_header_link
+  [readme_header_link]: https://cloudopsworks.co/readme/header/link?utm_source=github&utm_medium=readme&utm_campaign=cloudopsworks/terraform-module-aws-organizations&utm_content=readme_header_link
   [readme_footer_img]: https://cloudopsworks.co/images/main-logo-footer.png
-  [readme_footer_link]: https://cloudopsworks.co/readme/footer/link?utm_source=github&utm_medium=readme&utm_campaign=cloudopsworks/terraform-aws-organizations&utm_content=readme_footer_link
+  [readme_footer_link]: https://cloudopsworks.co/readme/footer/link?utm_source=github&utm_medium=readme&utm_campaign=cloudopsworks/terraform-module-aws-organizations&utm_content=readme_footer_link
   [readme_commercial_support_img]: https://cloudopsworks.co/readme/commercial-support/img
-  [readme_commercial_support_link]: https://cloudopsworks.co/readme/commercial-support/link?utm_source=github&utm_medium=readme&utm_campaign=cloudopsworks/terraform-aws-organizations&utm_content=readme_commercial_support_link
-  [share_twitter]: https://x.com/intent/tweet/?text=Terraform+Organizations+Module&url=https://github.com/cloudopsworks/terraform-aws-organizations
-  [share_linkedin]: https://www.linkedin.com/shareArticle?mini=true&title=Terraform+Organizations+Module&url=https://github.com/cloudopsworks/terraform-aws-organizations
-  [share_reddit]: https://reddit.com/submit/?url=https://github.com/cloudopsworks/terraform-aws-organizations
-  [share_facebook]: https://facebook.com/sharer/sharer.php?u=https://github.com/cloudopsworks/terraform-aws-organizations
-  [share_email]: mailto:?subject=Terraform+Organizations+Module&body=https://github.com/cloudopsworks/terraform-aws-organizations
-  [beacon]: https://ga-beacon.cloudospworks.co/G-QMZVYYN2VN/cloudopsworks/terraform-aws-organizations?pixel&cs=github&cm=readme&an=terraform-aws-organizations
+  [readme_commercial_support_link]: https://cloudopsworks.co/readme/commercial-support/link?utm_source=github&utm_medium=readme&utm_campaign=cloudopsworks/terraform-module-aws-organizations&utm_content=readme_commercial_support_link
+  [share_twitter]: https://x.com/intent/tweet/?text=Terraform+AWS+Organizations+Module&url=https://github.com/cloudopsworks/terraform-module-aws-organizations
+  [share_linkedin]: https://www.linkedin.com/shareArticle?mini=true&title=Terraform+AWS+Organizations+Module&url=https://github.com/cloudopsworks/terraform-module-aws-organizations
+  [share_reddit]: https://reddit.com/submit/?url=https://github.com/cloudopsworks/terraform-module-aws-organizations
+  [share_facebook]: https://facebook.com/sharer/sharer.php?u=https://github.com/cloudopsworks/terraform-module-aws-organizations
+  [share_email]: mailto:?subject=Terraform+AWS+Organizations+Module&body=https://github.com/cloudopsworks/terraform-module-aws-organizations
+  [beacon]: https://ga-beacon.cloudospworks.co/G-QMZVYYN2VN/cloudopsworks/terraform-module-aws-organizations?pixel&cs=github&cm=readme&an=terraform-module-aws-organizations

@@ -1,18 +1,30 @@
-# Module configuration
-# Required variables
-{{- range .requiredVariables }}
-{{- if ne .Name "org"}}
-# Description {{ .Description }} , Type: {{ .Type }}
-{{ .Name }}: {{ .DefaultValuePlaceholder }}
-{{- end }}
+# Module configuration — AWS Organizations account provisioning
+# Supply account-specific values below. Values for org, spoke_def, is_hub,
+# and extra_tags are injected automatically by the Terragrunt hierarchy.
 
-{{- end }}
-# Optional variables
-{{- range .optionalVariables }}
-{{- if ne .Name "is_hub" "spoke_def" "extra_args" }}
-# Description {{ .Description }} , Type: {{ .Type }}
-#{{ .Name }}: {{ .DefaultValue }}
-{{- end }}
+# organization_email: "admin@example.com"  # (Required) Root user email address for the new AWS account.
+organization_email: ""
 
-{{- end }}
+# name: ""  # (Optional) Display name of the account. When empty, defaults to the environment name from the tags module. Default: ""
+#name: ""
 
+# organization_role: "OrganizationAllowAllAccessAssumeRole"  # (Optional) IAM role name created in the new account for cross-account access. Default: "OrganizationAllowAllAccessAssumeRole"
+#organization_role: "OrganizationAllowAllAccessAssumeRole"
+
+# organization_allow_billing_access: true  # (Optional) Allow IAM users in the new account to access the billing console. Default: true
+#organization_allow_billing_access: true
+
+# organization_parent_name: ""  # (Optional) Name of the Organizational Unit to place this account under. Takes precedence over organization_parent_id when both are set. Default: ""
+#organization_parent_name: ""
+
+# organization_parent_id: ""  # (Optional) ID of the parent Organizational Unit (e.g. ou-xxxx-xxxxxxxx). Used when organization_parent_name is empty. Default: ""
+#organization_parent_id: ""
+
+# allow_group: false  # (Optional) When true, attaches an IAM assume-role policy to the group named in allowsts_group. Default: false
+#allow_group: false
+
+# allowsts_group: "terraform-access"  # (Optional) Name of the IAM group that receives assume-role permissions into this account. Requires allow_group: true. Default: "terraform-access"
+#allowsts_group: "terraform-access"
+
+# access_role: "TerraformRole"  # (Optional) Name of the IAM role in this account that the allowsts_group is allowed to assume. Default: "TerraformRole"
+#access_role: "TerraformRole"
