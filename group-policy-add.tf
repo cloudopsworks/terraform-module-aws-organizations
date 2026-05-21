@@ -12,7 +12,7 @@ module "allow_group" {
   source            = "./modules/group-policy"
   allowsts_group    = var.allowsts_group
   role_arn          = "arn:aws:iam::${aws_organizations_account.org.id}:role/${var.access_role}"
-  organization_unit = lower(var.organization_unit)
-  environment_name  = lower(var.environment_name)
-  environment_type  = lower(var.environment_type)
+  organization_unit = lower(var.org.organization_unit)
+  environment_name  = lower(var.org.environment_name)
+  environment_type  = lower(var.org.environment_type)
 }
