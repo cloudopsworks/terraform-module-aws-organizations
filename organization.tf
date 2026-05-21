@@ -1,17 +1,11 @@
 ##
-# (c) 2024 - Cloud Ops Works LLC - https://cloudops.works/
-#            On GitHub: https://github.com/cloudopsworks
-#            Distributed Under Apache v2.0 License
+# (c) 2021-2026
+#     Cloud Ops Works LLC - https://cloudops.works/
+#     Find us on:
+#       GitHub: https://github.com/cloudopsworks
+#       WebSite: https://cloudops.works
+#     Distributed Under Apache v2.0 License
 #
-# This template will setup organization with the information below,
-# Set-up of role is automatic + the the access to billing for
-# iam users are granted by default
-locals {
-  all_tags = merge(
-    var.extra_tags,
-    module.tags.locals.common_tags
-  )
-}
 
 data "aws_organizations_organization" "current" {}
 
